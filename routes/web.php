@@ -16,4 +16,5 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [HomeController::class, 'index']) -> name('home');
+Route::post('/addresses/search', [AddressController::class, 'search'])->name('addresses.search');
 Route::resource('addresses', AddressController::class);

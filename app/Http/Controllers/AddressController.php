@@ -22,8 +22,37 @@ class AddressController extends Controller
     {
         //
         $addresses = $this->address->all();
-        return view('addresses', ['addresses' => $addresses]);
+        $address = null;
+        return view('addresses', ['addresses' => $addresses, 'address' => $address, 'msg' => '']);
     }
+
+    public function search(Request $request)
+{
+    $searchQuery = $request->input('search_query');
+    
+
+    $address = Address::where('postal_code', $searchQuery)->first();
+    $msg = null;
+    $newAddress = new Address();
+    if (!$address) {
+        $msg = "Endereço não encontrado!";
+        $url = "https://viacep.com.br/ws/{$searchQuery}/json/";
+        $response = file_get_contents($url);
+        $apiResult = json_decode($response, true);
+
+        if (!empty($apiResult) && !isset($apiResult['erro'])) {
+            $newAddress->postal_code = $apiResult['cep'];
+            $newAddress->street = isset($apiResult['logradouro']) ? $apiResult['logradouro'] : '';
+            $newAddress->number = isset($apiResult['complemento']) ? $apiResult['complemento'] : '';
+            $newAddress->city = isset($apiResult['localidade']) ? $apiResult['localidade'] : '';
+            $newAddress->state = isset($apiResult['uf']) ? $apiResult['uf'] : '';
+            $newAddress->save();
+        }
+    }
+
+    $addresses = Address::all();
+    return view('addresses', ['addresses' => $addresses, 'address' => $address, 'msg' => $msg]);
+}
 
     /**
      * Show the form for creating a new resource.

@@ -10,14 +10,13 @@ Certifique-se de ter as seguintes ferramentas instaladas em sua máquina:
 - [Composer](https://getcomposer.org/)
 - [Node.js](https://nodejs.org/)
 - [npm](https://www.npmjs.com/)
-- [MySQL](https://www.mysql.com/)
 
 ## Configuração
 
 1. Clone este repositório para a sua máquina:
 
 ```bash
-$git clone https://github.com/ThiagoSartorel/LaravelAddressCRUD.git
+git clone https://github.com/ThiagoSartorel/LaravelAddressCRUD.git
 ```
 
 2. Instale as dependências do PHP com o Composer:

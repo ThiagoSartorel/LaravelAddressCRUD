@@ -2,27 +2,10 @@
 
 @section('content')
 
-<div class="flex flex-col items-center w-1/2 mx-auto my-8">
-    <h2 class="text-3xl font-bold mb-4">Desafio - DESENVOLVEDOR FULL STACK JR/PL</h2>
-    
-    <!-- Formulário de busca -->
-    <form action="{{ route('addresses.search') }}" method="post" class="mb-4">
-        @csrf
-        <input type="text" name="search_query" class="border rounded px-2 py-1" placeholder="Digite o CEP para buscar">
-        <button type="submit" class="btn-primary ml-2">Buscar</button>
-    </form>
-    
-    <!-- Exibir resultados da busca -->
-    @if (count($addresses) > 0)
-        <ul class="list-disc list-inside">
-            @foreach ($addresses as $address)
-                <li>{{ $address->street }}, {{ $address->number }}, {{ $address->city }}, {{ $address->state }}</li>
-            @endforeach
-        </ul>
-    @else
-        <p>Nenhum endereço encontrado.</p>
-    @endif
-
+<div class="flex flex-col items-center mx-4 md:w-1/2 md:mx-auto my-8 space-y-8">
+    <h2 class="text-3xl font-bold ">Desafio DESENVOLVEDOR FULL STACK JR/PL</h2>
+    <p class="text-justify text-xl">O desafio é composto por desenvolver uma API para um sistema FrontEnd de busca por CEP’S (necessário desenvolver) utilizar API Publica para buscar CEP’S que ainda não foram cadastrados na base de dados do sistema, para isso o sistema deve conter um CRUD básico de endereços e o layout ficará a critério do candidato.</p>
+    <a href="{{ route('addresses.index') }}" class="w-full md:w-1/4 btn-primary text-xl">Continuar</a>
 </div>
 
 @endsection

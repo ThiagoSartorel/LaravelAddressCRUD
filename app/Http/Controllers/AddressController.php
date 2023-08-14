@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Address;
+use Illuminate\Support\Facades\Log;
 
 class AddressController extends Controller
 {
@@ -27,39 +28,42 @@ class AddressController extends Controller
     }
 
     public function search(Request $request)
-{
-    $searchQuery = $request->input('search_query');
-    
+    {
 
-    $address = Address::where('postal_code', $searchQuery)->first();
-    $msg = null;
-    $newAddress = new Address();
-    if (!$address) {
-        $msg = "Endereço não encontrado!";
-        $url = "https://viacep.com.br/ws/{$searchQuery}/json/";
-        $response = file_get_contents($url);
-        $apiResult = json_decode($response, true);
+        $searchQuery = $request->input('search_query');
 
-        if (!empty($apiResult) && !isset($apiResult['erro'])) {
-            $newAddress->postal_code = $apiResult['cep'];
-            $newAddress->street = isset($apiResult['logradouro']) ? $apiResult['logradouro'] : '';
-            $newAddress->number = isset($apiResult['complemento']) ? $apiResult['complemento'] : '';
-            $newAddress->city = isset($apiResult['localidade']) ? $apiResult['localidade'] : '';
-            $newAddress->state = isset($apiResult['uf']) ? $apiResult['uf'] : '';
-            $newAddress->save();
+        $address = Address::where('postal_code', $searchQuery)->first();
+        $msg = null;
+        $addresses = $this->address->all();
+        $newAddress = new Address();
+        if (!$address) {
+            try {
+                $msg = "Endereço adicionado para próxima busca.";
+                $url = "https://viacep.com.br/ws/{$searchQuery}/json/";
+                $response = file_get_contents($url);
+                $apiResult = json_decode($response, true);
+            } catch (\Exception $e) {
+                return view('addresses', ['msg' => "Ocorreu um problema ao realizar a busca!", 'address' => [], 'addresses' => $addresses]);
+            }
+            if (!empty($apiResult) && !isset($apiResult['erro'])) {
+                $newAddress->postal_code = $apiResult['cep'];
+                $newAddress->street = isset($apiResult['logradouro']) ? $apiResult['logradouro'] : '';
+                $newAddress->number = isset($apiResult['complemento']) ? $apiResult['complemento'] : '';
+                $newAddress->city = isset($apiResult['localidade']) ? $apiResult['localidade'] : '';
+                $newAddress->state = isset($apiResult['uf']) ? $apiResult['uf'] : '';
+                $newAddress->save();
+            }
         }
+        $addresses = $this->address->all();
+        
+        return view('addresses', ['addresses' => $addresses, 'address' => $address, 'msg' => $msg]);
     }
-
-    $addresses = Address::all();
-    return view('addresses', ['addresses' => $addresses, 'address' => $address, 'msg' => $msg]);
-}
 
     /**
      * Show the form for creating a new resource.
      */
     public function create()
     {
-        return view('address_create');
     }
 
     /**
@@ -68,14 +72,17 @@ class AddressController extends Controller
     public function store(Request $request)
     {
         //
+
         $data = $request->except('_token');
         $created = $this->address->create($data);
+        $addresses = Address::all();
 
         if ($created) {
-            return redirect()->back()->with('message', 'Successfully created');
+            return view('addresses', ['addresses' => $addresses, 'address' => [], 'msg' => 'Criado com sucesso!']);
         }
 
-        return redirect()->back()->with('message', 'Error create address');
+        return view('addresses', ['addresses' => $addresses, 'address' => [], 'msg' => 'Ocorreu um problema ao cadastrar!']);
+
     }
 
     /**
@@ -84,17 +91,12 @@ class AddressController extends Controller
     public function show(address $address)
     {
         //
-        return view('address_show', ['address' => $address]);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Address $address)
-    {
-        //
-        return view('address_edit', ['address' => $address]);
-    }
+
 
     /**
      * Update the specified resource in storage.
@@ -102,12 +104,15 @@ class AddressController extends Controller
     public function update(Request $request, string $id)
     {
         //
-        $updated = $this->address->where('id', $id)->update($request->except(['_token', '_method']));
+
+        $updated = $this->address->where('id', $id)->update($request->all());
+        $addresses = Address::all();
+
         if ($updated) {
-            return redirect()->back()->with('message', 'Successfully updated');
+            return view('addresses', ['addresses' => $addresses, 'address' => [], 'msg' => 'Atualizado com sucesso!']);
         }
 
-        return redirect()->back()->with('message', 'Error updating address');
+        return view('addresses', ['addresses' => $addresses, 'address' => [], 'msg' => 'Ocorreu um problema ao atualizar!']);
     }
 
     /**
@@ -117,6 +122,9 @@ class AddressController extends Controller
     {
         //
         $this->address->where('id', $id)->delete();
-        return redirect()->route('addresses.index');
+        $addresses = $this->address->all();
+        $address = null;
+
+        return view('addresses', ['addresses' => $addresses, 'address' => $address, 'msg' => 'Sucesso ao excluir!']);
     }
 }

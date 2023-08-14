@@ -7,7 +7,9 @@
         <title>Laravel</title>
         @vite(['resources/css/app.css','resources/css/app.js'])
     </head>
-    <body class="md:mx-20 mt-10 bg-gradient-to-r from-slate-900 to-slate-950 text-white">
+    <body id="app" class="md:mx-20 mt-10 bg-gradient-to-r from-slate-900 to-slate-950 text-white">
         @yield('content')
+        @vite('resources/js/app.js')
     </body>
+
 </html>
